@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>يوم مفيد</title>
+    <style>
+      html, body {
+        background-size: auto;
+        background-color: #444444;
+      }
+      #unity-loading-bar {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      #unity-logo1 {
+        width: 40vw;
+        max-width: 280px;
+        height: auto;
+      }
+
+      #unity-progress-bar {
+        width: 764px;
+        max-width: 90vw;
+        height: 40px;
+        margin-top: 60px;
+        background: url('bar.png') no-repeat center center;
+        background-size: 100% 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        transform: scale(0.7);
+        transform-origin: top center;
+      }
+
+      #unity-progress-bar-fill {
+        position: absolute;
+        top: 7px;
+        left: 6px;
+        height: calc(100% - 14px);
+        width: 0%;
+        background-color: #55CAC2;
+        transition: width 0.3s ease;
+        border-radius: 20px 0 0 20px;
+      }
+
+      @media (max-width: 768px) {
+        #unity-logo1 {
+          width: 50vw;
+          max-width: 200px;
+        }
+
+        #unity-progress-bar {
+          width: 550px;
+          height: 30px;
+          margin-top: 0px;
+        }
+
+        #unity-progress-bar-fill {
+          border-radius: 5px 0 0 5px;
+        }
+      }
+    </style>
+  <link rel="icon" type="image/png" href="Logo.png">
+<style id="unity-fit-centered-style">
+  :root { --vh: 1vh; }
+  html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; }
+  body { overscroll-behavior: none; }
+  #unity-container { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; }
+  /* احترام الـSafe Areas على iOS */
+  #unity-container { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  #unity-canvas { display: block; background: #231F20; transform-origin: center center; }
+</style>
+
+</head>
+  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
+    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1" style="width: 1920px; height: 1080px; background: #231F20"></canvas>
+
+    <!-- ✅ Added Loading Logo and Progress Bar -->
+    <div id="unity-loading-bar">
+      <img id="unity-logo1" src="logo1.png" alt="Loading Logo">
+      <div id="unity-progress-bar">
+        <div id="unity-progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <script src="Build/Build.loader.js"></script>
+    <script>
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.position = "fixed";
+
+        document.body.style.textAlign = "left";
+      }
+
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        arguments: [],
+        dataUrl: "Build/Build.data.unityweb",
+        frameworkUrl: "Build/Build.framework.js.unityweb",
+        codeUrl: "Build/Build.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "AQTAR",
+        productName: "يوم مفيد",
+        productVersion: "1.0"
+      }, (progress) => {
+        // ✅ Update progress bar fill
+        document.getElementById("unity-progress-bar-fill").style.width = (progress * 100) + "%";
+      }).then(() => {
+        // ✅ Hide loading bar when done
+        document.getElementById("unity-loading-bar").style.display = "none";
+      }).catch((message) => {
+        alert("Unity load failed: " + message);
+      });
+    </script>
+  
+<script id="unity-fit-centered-script">
+(function () {
+  var TARGET_ASPECT = 1.777778; // width/height
+  var MOBILE_BASE_W = 1920;
+  var MOBILE_BASE_H = 1080;
+
+  function isMobile() {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+  function isPortrait() {
+    var m = window.matchMedia && window.matchMedia('(orientation: portrait)');
+    return m ? m.matches : (window.innerHeight >= window.innerWidth);
+  }
+  function isLandscape() { return !isPortrait(); }
+
+  function vpWidth() {
+    return (window.visualViewport ? Math.floor(window.visualViewport.width) : window.innerWidth);
+  }
+  function vpHeight() {
+    // استخدم --vh لتفادي شريط العنوان في iOS
+    var cssVh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh'));
+    if (!isNaN(cssVh) && cssVh > 0) return Math.floor(cssVh * 100);
+    var h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    return Math.floor(h);
+  }
+  function setVhVar() {
+    var h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    if (h && h > 0) document.documentElement.style.setProperty('--vh', (h / 100) + 'px');
+  }
+
+  // --- Layout ---
+  function sizeLandscape(canvas) {
+    // نحافظ على الـAspect (Letterbox)
+    var vw = vpWidth(), vh = vpHeight();
+    var viewportAspect = vw / vh, drawW, drawH;
+    if (viewportAspect > TARGET_ASPECT) { drawH = vh; drawW = Math.floor(drawH * TARGET_ASPECT); }
+    else { drawW = vw; drawH = Math.floor(drawW / TARGET_ASPECT); }
+    canvas.style.width  = drawW + 'px';
+    canvas.style.height = drawH + 'px';
+    canvas.style.transform = '';
+  }
+  function sizePortrait(canvas) {
+    // نملأ الشاشة بالكامل
+    var vw = vpWidth(), vh = vpHeight();
+    canvas.style.width  = vw + 'px';
+    canvas.style.height = vh + 'px';
+    canvas.style.transform = '';
+  }
+
+  function applyLayout() {
+    var container = document.getElementById('unity-container') || document.body;
+    var canvas = document.getElementById('unity-canvas') || document.querySelector('canvas');
+    if (!canvas) return;
+
+    var c = container.style;
+    c.position = 'fixed';
+    c.inset = '0';
+    c.display = 'flex';
+    c.alignItems = 'center';
+    c.justifyContent = 'center';
+    c.background = '#000';
+
+    if (isMobile() && isPortrait()) sizePortrait(canvas);
+    else sizeLandscape(canvas);
+
+    document.body.style.overscrollBehavior = 'none';
+  }
+
+  // --- Fullscreen (بدون زر) ---
+  var userInteracted = false;
+  var triedLockOnce = false;
+
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  function canUseRealFullscreen() {
+    // على iOS غالبًا لا يعمل Fullscreen API لعناصر الويب كـcanvas (نكتفي بالـCSS)
+    return !isIOS() && !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+  }
+
+  async function requestFullscreenIfLandscape() {
+    if (!isMobile() || !isLandscape() || document.fullscreenElement) return;
+    if (!canUseRealFullscreen()) return; // iOS: نتجاهل ونكتفي بالـCSS
+
+    try {
+      var el = document.documentElement;
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req) {
+        await req.call(el);
+        if (!triedLockOnce && screen.orientation && screen.orientation.lock) {
+          triedLockOnce = true;
+          screen.orientation.lock('landscape').catch(function(){});
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function onFirstUserGesture() {
+    if (!userInteracted) userInteracted = true;
+    requestFullscreenIfLandscape();
+  }
+
+  function onOrientationChange() {
+    if (isMobile() && isLandscape() && userInteracted && !document.fullscreenElement) {
+      requestFullscreenIfLandscape();
+    }
+    schedule();
+  }
+
+  // --- Scheduler ---
+  var scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(function () {
+      scheduled = false;
+      setVhVar();
+      applyLayout();
+    });
+  }
+
+  // Hooks
+  window.addEventListener('load', schedule, { passive: true });
+  window.addEventListener('resize', schedule, { passive: true });
+  window.addEventListener('orientationchange', onOrientationChange, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport.addEventListener('scroll', schedule, { passive: true });
+  }
+  ['pointerdown','touchend','mousedown','keydown'].forEach(function(ev){
+    window.addEventListener(ev, onFirstUserGesture, { once:false, passive:true });
+  });
+  document.addEventListener('fullscreenchange', schedule, { passive: true });
+
+  // Run asap
+  setVhVar();
+  applyLayout();
+
+  // --- (اختياري) تسجيل Service Worker للـPWA إن وُجد ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations && navigator.serviceWorker.getRegistrations().then(function(regs){
+      // لا نفعل أي شيء هنا — تسجيل يتم أسفل عند تمكين PWA
+    });
+  }
+})();
+</script>
+</body>
+</html>
